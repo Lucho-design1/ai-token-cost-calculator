@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Token Cost Calculator & ROI Estimator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans p-4 md:p-8">
+  <div class="max-w-4xl mx-auto bg-slate-800 rounded-2xl shadow-2xl p-6 md:p-10 border border-slate-700">
+    <header class="text-center mb-8">
+      <h1 class="text-3xl md:text-4xl font-extrabold text-indigo-400 mb-2">⚡ Calculadora de Costos de Tokens de IA</h1>
+      <p class="text-slate-400">Compara al instante cuánto gastas en OpenAI, Claude 3.5, Gemini 1.5 y Groq. ¡Optimiza tus llamadas a APIs!</p>
+    </header>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div class="bg-slate-900 p-6 rounded-xl border border-slate-700">
+        <label class="block text-sm font-medium mb-2 text-indigo-300">Tokens de Entrada por Mes (Input Tokens)</label>
+        <input type="number" id="inputTokens" value="10000000" step="1000000" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-4" oninput="calculate()">
+        
+        <label class="block text-sm font-medium mb-2 text-indigo-300">Tokens de Salida por Mes (Output Tokens)</label>
+        <input type="number" id="outputTokens" value="2000000" step="500000" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-4" oninput="calculate()">
+
+        <label class="block text-sm font-medium mb-2 text-indigo-300">Solicitudes por Día (Peticiones API)</label>
+        <input type="number" id="requestsPerDay" value="5000" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" oninput="calculate()">
+      </div>
+
+      <div class="bg-slate-900 p-6 rounded-xl border border-slate-700 flex flex-col justify-between">
+        <div>
+          <h3 class="text-lg font-bold text-emerald-400 mb-3">💡 Tip de Ahorro Máximo</h3>
+          <p class="text-sm text-slate-300 mb-4">Migrar cargas de trabajo de baja complejidad a <strong>Gemini 1.5 Flash</strong> o <strong>Groq Llama-3</strong> puede reducir tus costos de infraestructura de IA hasta un <strong>85% mensual</strong>.</p>
+        </div>
+        <div class="bg-indigo-950 p-4 rounded-lg border border-indigo-700 text-center">
+          <p class="text-xs text-indigo-300 uppercase tracking-wider font-semibold mb-1">Ahorro Estimado Migrando a Modelos Eficientes</p>
+          <span id="maxSavings" class="text-3xl font-black text-emerald-300">$0.00 / mes</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comparativa de Proveedores -->
+    <div class="overflow-x-auto mb-10">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-slate-700 text-slate-400 text-sm uppercase">
+            <th class="p-3">Modelo / Proveedor</th>
+            <th class="p-3">Precio Input / 1M</th>
+            <th class="p-3">Precio Output / 1M</th>
+            <th class="p-3 text-right">Costo Mensual Estimado</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody" class="divide-y divide-slate-700/50 text-slate-200 font-medium">
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Monetización & Servicios Directos -->
+    <div class="bg-gradient-to-r from-indigo-900 to-slate-900 rounded-xl p-6 border border-indigo-500/30 text-center md:text-left md:flex md:items-center md:justify-between mb-8">
+      <div class="mb-4 md:mb-0">
+        <h3 class="text-xl font-bold text-white mb-1">🚀 ¿Quieres auditar y reducir el consumo de tu infraestructura de IA?</h3>
+        <p class="text-sm text-indigo-200">Ofrecemos auditoría y configuración de servidor MCP / enrutamiento inteligente de LLMs por $49 USD.</p>
+      </div>
+      <a href="https://paypal.me/lucianobenech/49USD" target="_blank" class="inline-block bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-extrabold py-3 px-6 rounded-xl shadow-lg transition transform hover:-translate-y-0.5">
+        Contratar Auditoría ($49 USD)
+      </a>
+    </div>
+
+    <!-- Footer Info & Affiliate -->
+    <footer class="text-center text-xs text-slate-500 border-t border-slate-800 pt-6 space-y-2">
+      <p>Aceptamos pagos directos vía PayPal (<a href="https://paypal.me/lucianobenech" class="text-indigo-400 underline" target="_blank">paypal.me/lucianobenech</a>) o USDT (TRC20: <span class="font-mono text-slate-400">TYndYVBb42q6U79tCm3VQzzhv2FtwAndhc</span>)</p>
+      <p>💡 Descubre minería pasiva de Bitcoin en la nube: <a href="https://gomining.com/?ref=tCW6U" target="_blank" class="text-emerald-400 font-semibold underline">Probar GoMining con código tCW6U</a></p>
+    </footer>
+  </div>
+
+  <script>
+    const providers = [
+      { name: "OpenAI GPT-4o", inputRate: 2.50, outputRate: 10.00, badge: "bg-blue-900 text-blue-200" },
+      { name: "Claude 3.5 Sonnet", inputRate: 3.00, outputRate: 15.00, badge: "bg-amber-900 text-amber-200" },
+      { name: "Gemini 1.5 Pro", inputRate: 1.25, outputRate: 5.00, badge: "bg-indigo-900 text-indigo-200" },
+      { name: "Gemini 1.5 Flash", inputRate: 0.075, outputRate: 0.30, badge: "bg-emerald-900 text-emerald-200" },
+      { name: "Groq Llama 3.3 70B", inputRate: 0.59, outputRate: 0.79, badge: "bg-purple-900 text-purple-200" },
+      { name: "DeepSeek V3", inputRate: 0.14, outputRate: 0.28, badge: "bg-cyan-900 text-cyan-200" }
+    ];
+
+    function calculate() {
+      const inputs = parseFloat(document.getElementById('inputTokens').value) || 0;
+      const outputs = parseFloat(document.getElementById('outputTokens').value) || 0;
+
+      const results = providers.map(p => {
+        const cost = ((inputs / 1000000) * p.inputRate) + ((outputs / 1000000) * p.outputRate);
+        return { ...p, totalCost: cost };
+      });
+
+      results.sort((a, b) => b.totalCost - a.totalCost);
+      const maxCost = results[0].totalCost;
+      const minCost = results[results.length - 1].totalCost;
+      const savings = maxCost - minCost;
+
+      document.getElementById('maxSavings').innerText = `$${savings.toFixed(2)} / mes`;
+
+      const tbody = document.getElementById('resultsBody');
+      tbody.innerHTML = '';
+
+      results.forEach(r => {
+        const row = document.createElement('tr');
+        row.className = 'border-b border-slate-800 hover:bg-slate-800/50 transition';
+        row.innerHTML = `
+          <td class="p-3 font-semibold text-white flex items-center space-x-2">
+            <span>${r.name}</span>
+          </td>
+          <td class="p-3 text-slate-400">$${r.inputRate.toFixed(3)}</td>
+          <td class="p-3 text-slate-400">$${r.outputRate.toFixed(3)}</td>
+          <td class="p-3 text-right font-bold ${r.totalCost === minCost ? 'text-emerald-400 text-lg' : 'text-slate-200'}">$${r.totalCost.toFixed(2)}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    calculate();
+  </script>
+</body>
+</html>
